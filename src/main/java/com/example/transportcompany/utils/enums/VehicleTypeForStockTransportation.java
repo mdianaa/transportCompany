@@ -1,6 +1,6 @@
 package com.example.transportcompany.utils.enums;
 
-public enum VehicleTypeTransportStock {
+public enum VehicleTypeForStockTransportation {
 
     SMALL_TRUCK(8),
     BIG_TRUCK(15),
@@ -8,7 +8,7 @@ public enum VehicleTypeTransportStock {
 
     private int tons;
 
-    VehicleTypeTransportStock(int tons) {
+    VehicleTypeForStockTransportation(int tons) {
         this.tons = tons;
     }
 }

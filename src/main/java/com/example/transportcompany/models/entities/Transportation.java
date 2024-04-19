@@ -16,11 +16,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "transportations")
-public class Transportation {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Transportation extends BaseEntity {
 
     @Column(name = "start_point", nullable = false)
     private String startPoint;
@@ -42,9 +38,9 @@ public class Transportation {
 
     @ManyToOne
     @JoinColumn(name="employee_id")
-    private Employee employee;
+    private DriverEmployee driverEmployee;
 
-    @OneToMany(mappedBy = "transportation")
+    @OneToMany(mappedBy = "transportation", targetEntity = Load.class)
     private Set<Load> load;
 
     @ManyToOne
@@ -53,5 +49,5 @@ public class Transportation {
 
     @ManyToOne
     @JoinColumn(name="company_id")
-    private TransportCompany company;
+    private Company company;
 }

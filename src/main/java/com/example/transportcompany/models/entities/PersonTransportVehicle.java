@@ -1,6 +1,6 @@
 package com.example.transportcompany.models.entities;
 
-import com.example.transportcompany.utils.enums.VehicleTypeTransportPeople;
+import com.example.transportcompany.utils.enums.VehicleTypeForPeopleTransportation;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,10 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@DiscriminatorValue("PEOPLE_TRANSPORT_VEHICLE")
-public class PeopleTransportVehicle extends Vehicle {
+public class PersonTransportVehicle extends Vehicle {
 
     @Enumerated(EnumType.STRING)
-    private VehicleTypeTransportPeople vehicleType;
+    private VehicleTypeForPeopleTransportation vehicleType;
 
 }

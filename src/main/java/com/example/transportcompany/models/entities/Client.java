@@ -14,28 +14,24 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "clients")
-public class Client {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Client extends BaseEntity {
 
     @Column(nullable = false, length = 30)
     private String name;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 50, unique = true)
     private String email;
 
-    @Column(nullable = false, name = "phone_number", length = 20)
+    @Column(name = "phone_number", nullable = false, length = 20)
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", targetEntity = Transportation.class)
     private Set<Transportation> transportations;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", targetEntity = Load.class)
     private Set<Load> load;
 
     @ManyToOne
     @JoinColumn(name="company_id")
-    private TransportCompany company;
+    private Company company;
 }

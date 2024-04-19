@@ -14,35 +14,30 @@ import java.util.Set;
 @Setter
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "transport_company_type", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "transport_companies")
-public class TransportCompany {
+public class Company extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String address;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number", nullable = false, length = 15)
     private String phoneNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String email;
 
-    @OneToMany(mappedBy = "company")
-    private Set<Employee> employees;
+    @OneToMany(mappedBy = "company", targetEntity = DriverEmployee.class)
+    private Set<DriverEmployee> driverEmployees;
 
-    @OneToMany(mappedBy = "company", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "company", targetEntity = Transportation.class)
     private Set<Transportation> transportations;
 
-    @OneToMany(mappedBy = "company", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "company", targetEntity = Client.class)
     private Set<Client> clients;
 
-    @OneToMany(mappedBy = "company")
+    @OneToMany(mappedBy = "company", targetEntity = Income.class)
     private Set<Income> monthlyIncomes;
 }

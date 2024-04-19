@@ -16,11 +16,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "employees")
-public class Employee {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class DriverEmployee extends BaseEntity {
 
     @Column(nullable = false, length = 40)
     private String name;
@@ -40,10 +36,10 @@ public class Employee {
     @OneToOne
     private Vehicle vehicle;
 
-    @OneToMany(mappedBy = "employee")
+    @OneToMany(mappedBy = "driverEmployee", targetEntity = Transportation.class)
     private Set<Transportation> transportations;
 
     @ManyToOne
     @JoinColumn(name="company_id")
-    private TransportCompany company;
+    private Company company;
 }

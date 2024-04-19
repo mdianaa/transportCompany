@@ -11,12 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@DiscriminatorValue("PERSON_LOAD")
+//@DiscriminatorValue("PERSON_LOAD")
 public class Person extends Load {
 
-    @Column(nullable = false, name = "full_name", length = 50)
-    private String fullName;
-
-    @Column(nullable = false, name = "phone_number", length = 20)
+    @Column(name = "phone_number", nullable = false, length = 15)
     private String phoneNumber;
 }

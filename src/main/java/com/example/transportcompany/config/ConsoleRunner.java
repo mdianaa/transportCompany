@@ -1,23 +1,21 @@
 package com.example.transportcompany.config;
 
 import com.example.transportcompany.models.dtos.requests.*;
-import com.example.transportcompany.models.entities.Employee;
-import com.example.transportcompany.models.entities.TransportCompany;
+import com.example.transportcompany.models.entities.DriverEmployee;
+import com.example.transportcompany.models.entities.Company;
 import com.example.transportcompany.models.entities.Transportation;
 import com.example.transportcompany.services.*;
 import com.example.transportcompany.utils.enums.DriverQualification;
-import com.example.transportcompany.utils.enums.VehicleTypeTransportPeople;
-import com.example.transportcompany.utils.enums.VehicleTypeTransportStock;
+import com.example.transportcompany.utils.enums.VehicleTypeForPeopleTransportation;
+import com.example.transportcompany.utils.enums.VehicleTypeForStockTransportation;
 import com.example.transportcompany.utils.fileLogic.TransportationFileLogic;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 
-@Component
 public class ConsoleRunner implements CommandLineRunner {
     private final TransportCompanyService transportCompanyService;
     private final TransportationService transportationService;
@@ -60,8 +58,8 @@ public class ConsoleRunner implements CommandLineRunner {
         clientService.registerClient(client1, company1);
         clientService.registerClient(client2, company2);
 
-        StockTransportVehicleDto stockTransportVehicle = new StockTransportVehicleDto("236534", "StR", "V8", VehicleTypeTransportStock.SMALL_TRUCK);
-        PeopleTransportVehicleDto peopleTransportVehicle = new PeopleTransportVehicleDto("325760", "AmR", "V8", VehicleTypeTransportPeople.SMALL_BUS);
+        StockTransportVehicleDto stockTransportVehicle = new StockTransportVehicleDto("236534", "StR", "V8", VehicleTypeForStockTransportation.SMALL_TRUCK);
+        PeopleTransportVehicleDto peopleTransportVehicle = new PeopleTransportVehicleDto("325760", "AmR", "V8", VehicleTypeForPeopleTransportation.SMALL_BUS);
 
         stockVehicleService.registerStockVehicle(stockTransportVehicle, company1);
         personVehicleService.registerPersonVehicle(peopleTransportVehicle, company2);
@@ -86,15 +84,15 @@ public class ConsoleRunner implements CommandLineRunner {
         TransportationFileLogic.readTransportationsFromFile();
 
         // sort companies by name
-        List<TransportCompany> companies = transportCompanyService.getAllCompanies();
-        companies.sort(Comparator.comparing(TransportCompany::getName));
+        List<Company> companies = transportCompanyService.getAllCompanies();
+        companies.sort(Comparator.comparing(Company::getName));
         // sort companies by income
         // Collections.sort(companies, Comparator.comparingDouble(TransportCompany::getMonthlyIncomes));
 
         // filter companies by name
         String prefix = "Li";
 
-        List<TransportCompany> filteredCompaniesName = companies.stream()
+        List<Company> filteredCompaniesName = companies.stream()
                 .filter(c -> c.getName().startsWith(prefix))
                 .toList();
 
@@ -102,23 +100,23 @@ public class ConsoleRunner implements CommandLineRunner {
 //         double income = 100000;
 //         List<TransportCompany> filteredCompaniesIncome = companies.stream().filter(c -> c.getMonthlyIncomes() > income).toList();
 
-        List<Employee> employees = employeeService.getAllEmployeesInCompany(transportCompanyService.getCompanyByName(company1.getName()).getName());
+        List<DriverEmployee> driverEmployees = employeeService.getAllEmployeesInCompany(transportCompanyService.getCompanyByName(company1.getName()).getName());
 
         // sort employees by qualification
-        employees.sort(Comparator.comparing(Employee::getQualification));
+        driverEmployees.sort(Comparator.comparing(DriverEmployee::getQualification));
 
         // sort employees by salary
-        employees.sort(Comparator.comparing(Employee::getSalary));
+        driverEmployees.sort(Comparator.comparing(DriverEmployee::getSalary));
 
         // filter employees by qualification
         DriverQualification qualification = DriverQualification.C1E;
-        List<Employee> filteredEmployeesByQualification = employees.stream()
+        List<DriverEmployee> filteredEmployeesByQualification = driverEmployees.stream()
                 .filter(e -> e.getQualification().equals(qualification))
                 .toList();
 
         // filter employees by salary
         BigDecimal salary = BigDecimal.valueOf(10000);
-        List<Employee> filteredEmployeesBySalary = employees.stream()
+        List<DriverEmployee> filteredEmployeesBySalary = driverEmployees.stream()
                 .filter(e -> e.getSalary().compareTo(salary) > 0)
                 .toList();
 

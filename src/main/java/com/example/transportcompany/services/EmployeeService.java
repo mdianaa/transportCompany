@@ -2,7 +2,7 @@ package com.example.transportcompany.services;
 
 import com.example.transportcompany.models.dtos.requests.EmployeeDto;
 import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
-import com.example.transportcompany.models.entities.Employee;
+import com.example.transportcompany.models.entities.DriverEmployee;
 import com.example.transportcompany.models.entities.Transportation;
 import com.example.transportcompany.models.entities.Vehicle;
 import com.example.transportcompany.utils.enums.DriverQualification;
@@ -18,7 +18,7 @@ public interface EmployeeService {
     String editEmployeeSalary(String name, BigDecimal newSalary);
     String editEmployeeVehicle(String name, Vehicle vehicle);
     String editEmployeeQualification(String name, DriverQualification qualification);
-    List<Employee> getAllEmployeesInCompany(String name);
+    List<DriverEmployee> getAllEmployeesInCompany(String name);
     String commitNewTransportation(String name, Transportation transportation);
     String deleteEmployee(String name);
 }

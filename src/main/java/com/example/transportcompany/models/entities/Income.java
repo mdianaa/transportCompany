@@ -15,20 +15,16 @@ import java.math.BigDecimal;
 @Setter
 @Entity
 @Table(name = "income")
-public class Income {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+public class Income extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Month month;
 
-    @Column(nullable = false)
+    @Column(name = "current_mounth_income", nullable = false)
     private BigDecimal currentMonthIncome;
 
     @ManyToOne
     @JoinColumn(name="company_id")
-    private TransportCompany company;
+    private Company company;
 
 }

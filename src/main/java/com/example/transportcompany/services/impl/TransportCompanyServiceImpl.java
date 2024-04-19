@@ -4,8 +4,8 @@ import com.example.transportcompany.models.dtos.requests.TransportCompanyRequest
 import com.example.transportcompany.models.dtos.responses.TransportCompanyResponseDto;
 import com.example.transportcompany.models.dtos.requests.TransportationRequestDto;
 import com.example.transportcompany.models.dtos.responses.TransportationResponseDto;
-import com.example.transportcompany.models.entities.Employee;
-import com.example.transportcompany.models.entities.TransportCompany;
+import com.example.transportcompany.models.entities.DriverEmployee;
+import com.example.transportcompany.models.entities.Company;
 import com.example.transportcompany.models.entities.Transportation;
 import com.example.transportcompany.repositories.TransportCompanyRepository;
 import com.example.transportcompany.services.TransportCompanyService;
@@ -33,8 +33,8 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String registerCompany(TransportCompanyRequestDto transportCompanyRequestDto) {
         if (transportCompanyRepository.findByName(transportCompanyRequestDto.getName()).isEmpty()) {
-            TransportCompany transportCompany = mapper.map(transportCompanyRequestDto, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            Company company = mapper.map(transportCompanyRequestDto, Company.class);
+            transportCompanyRepository.saveAndFlush(company);
 
             return "Successfully registered company";
         }
@@ -45,13 +45,13 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String editCompanyName(String name, String newName) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(transportCompany, TransportCompanyRequestDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(company, TransportCompanyRequestDto.class);
 
             transportCompanyRequestDto.setName(newName);
 
-            transportCompany = mapper.map(transportCompanyRequestDto, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            company = mapper.map(transportCompanyRequestDto, Company.class);
+            transportCompanyRepository.saveAndFlush(company);
 
             return "Successfully changed company's name";
         }
@@ -62,13 +62,13 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String editCompanyAddress(String name, String newAddress) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(transportCompany, TransportCompanyRequestDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(company, TransportCompanyRequestDto.class);
 
             transportCompanyRequestDto.setAddress(newAddress);
 
-            transportCompany = mapper.map(transportCompanyRequestDto, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            company = mapper.map(transportCompanyRequestDto, Company.class);
+            transportCompanyRepository.saveAndFlush(company);
 
             return "Successfully changed company's address";
         }
@@ -79,13 +79,13 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String editCompanyPhoneNumber(String name, String newPhoneNumber) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(transportCompany, TransportCompanyRequestDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(company, TransportCompanyRequestDto.class);
 
             transportCompanyRequestDto.setPhoneNumber(newPhoneNumber);
 
-            transportCompany = mapper.map(transportCompanyRequestDto, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            company = mapper.map(transportCompanyRequestDto, Company.class);
+            transportCompanyRepository.saveAndFlush(company);
 
             return "Successfully changed company's phone number";
         }
@@ -96,13 +96,13 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String editCompanyEmail(String name, String newEmail) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(transportCompany, TransportCompanyRequestDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyRequestDto transportCompanyRequestDto = mapper.map(company, TransportCompanyRequestDto.class);
 
             transportCompanyRequestDto.setEmail(newEmail);
 
-            transportCompany = mapper.map(transportCompanyRequestDto, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            company = mapper.map(transportCompanyRequestDto, Company.class);
+            transportCompanyRepository.saveAndFlush(company);
 
             return "Successfully changed company's name company";
         }
@@ -111,21 +111,21 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     }
 
     @Override
-    public TransportCompany getCompanyByName(String name) {
+    public Company getCompanyByName(String name) {
         return transportCompanyRepository.findByName(name).get();
     }
 
 
     @Override
-    public List<TransportCompany> getAllCompanies() {
+    public List<Company> getAllCompanies() {
        return transportCompanyRepository.findAll();
     }
 
     @Override
     public String getTotalCountOfTransportations(String name) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(transportCompany, TransportCompanyResponseDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(company, TransportCompanyResponseDto.class);
 
             return "Total count of transportations: " + transportCompanyResponseDto.getTransportations().size();
         }
@@ -136,8 +136,8 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String getTotalPriceOfAllTransportations(String name) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(transportCompany, TransportCompanyResponseDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(company, TransportCompanyResponseDto.class);
 
             List<BigDecimal> allPrices = new ArrayList<>();
 
@@ -161,14 +161,14 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String getAllEmployeesWithTheirTransportationsCount(String name) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(transportCompany, TransportCompanyResponseDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(company, TransportCompanyResponseDto.class);
 
             StringBuilder sb = new StringBuilder();
 
-            Set<Employee> employees = transportCompanyResponseDto.getEmployees();
-            for (Employee employee : employees) {
-                sb.append(employee.getName()).append("has committed ").append(employee.getTransportations().size()).append(System.lineSeparator());
+            Set<DriverEmployee> driverEmployees = transportCompanyResponseDto.getDriverEmployees();
+            for (DriverEmployee driverEmployee : driverEmployees) {
+                sb.append(driverEmployee.getName()).append("has committed ").append(driverEmployee.getTransportations().size()).append(System.lineSeparator());
             }
 
             return sb.toString();
@@ -180,18 +180,18 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String getEachEmployeeCurrentIncome(String name) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
-            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(transportCompany, TransportCompanyResponseDto.class);
+            Company company = transportCompanyRepository.findByName(name).get();
+            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(company, TransportCompanyResponseDto.class);
 
             StringBuilder sb = new StringBuilder();
 
-            Set<Employee> employees = transportCompanyResponseDto.getEmployees();
-            for (Employee employee : employees) {
-                sb.append(employee.getName()).append("has a total income of: ");
+            Set<DriverEmployee> driverEmployees = transportCompanyResponseDto.getDriverEmployees();
+            for (DriverEmployee driverEmployee : driverEmployees) {
+                sb.append(driverEmployee.getName()).append("has a total income of: ");
 
                 BigDecimal totalEmployeeIncome = new BigDecimal(0);
 
-                for (Transportation transportation : employee.getTransportations()) {
+                for (Transportation transportation : driverEmployee.getTransportations()) {
                     BigDecimal price = transportation.getTransportationPricePerUnit().multiply(BigDecimal.valueOf(transportation.getLoad().size()));
                     totalEmployeeIncome = totalEmployeeIncome.add(price);
                 }
@@ -208,9 +208,9 @@ public class TransportCompanyServiceImpl implements TransportCompanyService {
     @Override
     public String deleteCompany(String name) {
         if (transportCompanyRepository.findByName(name).isPresent()) {
-            TransportCompany transportCompany = transportCompanyRepository.findByName(name).get();
+            Company transportCompany = transportCompanyRepository.findByName(name).get();
 
-            TransportCompany company = mapper.map(transportCompany, TransportCompany.class);
+            Company company = mapper.map(transportCompany, Company.class);
             transportCompanyRepository.delete(company);
 
             return "Successfully deleted company";

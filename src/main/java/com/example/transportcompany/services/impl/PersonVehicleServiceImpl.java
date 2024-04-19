@@ -2,8 +2,9 @@ package com.example.transportcompany.services.impl;
 
 import com.example.transportcompany.models.dtos.requests.PeopleTransportCompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.PeopleTransportVehicleDto;
-import com.example.transportcompany.models.entities.PeopleTransportCompany;
-import com.example.transportcompany.models.entities.PeopleTransportVehicle;
+import com.example.transportcompany.models.entities.PersonTransportationCompany;
+import com.example.transportcompany.models.entities.PersonTransportVehicle;
+import com.example.transportcompany.models.entities.Company;
 import com.example.transportcompany.repositories.PeopleTransportVehicleRepository;
 import com.example.transportcompany.repositories.TransportCompanyRepository;
 import com.example.transportcompany.services.PersonVehicleService;
@@ -31,7 +32,7 @@ public class PersonVehicleServiceImpl implements PersonVehicleService {
     @Override
     public String registerPersonVehicle(PeopleTransportVehicleDto peopleTransportVehicleDto, PeopleTransportCompanyRequestDto company) {
         if (peopleTransportVehicleRepository.findByRegistrationNumber(peopleTransportVehicleDto.getRegistrationNumber()).isEmpty()) {
-            PeopleTransportVehicle vehicle = mapper.map(peopleTransportVehicleDto, PeopleTransportVehicle.class);
+            PersonTransportVehicle vehicle = mapper.map(peopleTransportVehicleDto, PersonTransportVehicle.class);
             peopleTransportVehicleRepository.saveAndFlush(vehicle);
 
             if (company.getVehicles() == null) {
@@ -40,8 +41,11 @@ public class PersonVehicleServiceImpl implements PersonVehicleService {
 
             company.getVehicles().add(vehicle);
 
-            PeopleTransportCompany peopleTransportCompany = mapper.map(company, PeopleTransportCompany.class);
-            transportCompanyRepository.saveAndFlush(peopleTransportCompany);
+            PersonTransportationCompany personTransportCompany = mapper.map(company, PersonTransportationCompany.class);
+            Company transportCompany = transportCompanyRepository.findByName(personTransportCompany.getName()).get();
+            mapper.map(transportCompany, personTransportCompany);
+
+            transportCompanyRepository.saveAndFlush(transportCompany);
 
             return "Successfully registered vehicle";
         }
@@ -52,10 +56,10 @@ public class PersonVehicleServiceImpl implements PersonVehicleService {
     @Override
     public String editRegistrationNumber(String registrationNumber, String newRegistrationNumber) {
         if (peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            PeopleTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+            PersonTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
 
             PeopleTransportVehicleDto peopleTransportVehicle = new PeopleTransportVehicleDto(newRegistrationNumber, vehicle.getModel(), vehicle.getEngine(), vehicle.getVehicleType());
-            vehicle = mapper.map(peopleTransportVehicle, PeopleTransportVehicle.class);
+            vehicle = mapper.map(peopleTransportVehicle, PersonTransportVehicle.class);
             peopleTransportVehicleRepository.saveAndFlush(vehicle);
 
             return "Successfully changed vehicle's registration number";
@@ -67,10 +71,10 @@ public class PersonVehicleServiceImpl implements PersonVehicleService {
     @Override
     public String editVehicleEngine(String registrationNumber, String newEngine) {
         if (peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            PeopleTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+            PersonTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
 
             PeopleTransportVehicleDto peopleTransportVehicle = new PeopleTransportVehicleDto(vehicle.getRegistrationNumber(), vehicle.getModel(), newEngine, vehicle.getVehicleType());
-            vehicle = mapper.map(peopleTransportVehicle, PeopleTransportVehicle.class);
+            vehicle = mapper.map(peopleTransportVehicle, PersonTransportVehicle.class);
             peopleTransportVehicleRepository.saveAndFlush(vehicle);
 
             return "Successfully changed vehicle's engine";
@@ -80,14 +84,14 @@ public class PersonVehicleServiceImpl implements PersonVehicleService {
     }
 
     @Override
-    public PeopleTransportVehicle getVehicleByRegistrationNumber(String registrationNumber) {
+    public PersonTransportVehicle getVehicleByRegistrationNumber(String registrationNumber) {
         return peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
     }
 
     @Override
     public String deleteVehicle(String registrationNumber) {
         if (peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            PeopleTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+            PersonTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
             peopleTransportVehicleRepository.delete(vehicle);
 
             return "Successfully deleted vehicle";

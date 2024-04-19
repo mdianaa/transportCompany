@@ -11,29 +11,25 @@ import lombok.Setter;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@DiscriminatorColumn(name = "vehicle_transport_type", discriminatorType = DiscriminatorType.STRING)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Table(name = "vehicles")
-public class Vehicle {
+public class Vehicle extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
-    private long id;
-
-    @Column(nullable = false, name = "registration_number")
+    //TODO: registration number as ID
+    @Column(nullable = false, name = "registration_number", length = 20)
     private String registrationNumber;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String model;
 
-    @Column()
+    @Column(length = 10)
     private String engine;
 
     @ManyToOne
-    @JoinColumn(name="company_id")
-    private TransportCompany company;
+    @JoinColumn(name = "company_id")
+    private Company company;
 
-    @OneToOne(mappedBy="vehicle")
-    private Employee employee;
+    @OneToOne(mappedBy = "vehicle", targetEntity = DriverEmployee.class)
+    private DriverEmployee driverEmployee;
 
 }

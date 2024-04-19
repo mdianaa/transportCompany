@@ -1,7 +1,7 @@
 package com.example.transportcompany.services;
 
 import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
-import com.example.transportcompany.models.entities.TransportCompany;
+import com.example.transportcompany.models.entities.Company;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ public interface TransportCompanyService {
     String editCompanyPhoneNumber(String name, String newPhoneNumber);
     String editCompanyEmail(String name, String newEmail);
 
-    TransportCompany getCompanyByName(String name);
+    Company getCompanyByName(String name);
 
-    List<TransportCompany> getAllCompanies();
+    List<Company> getAllCompanies();
 
     String getTotalCountOfTransportations(String name);
 

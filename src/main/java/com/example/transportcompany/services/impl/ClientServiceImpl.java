@@ -4,7 +4,6 @@ import com.example.transportcompany.models.dtos.requests.ClientDto;
 import com.example.transportcompany.models.dtos.requests.PersonDto;
 import com.example.transportcompany.models.dtos.requests.StockDto;
 import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
-import com.example.transportcompany.models.dtos.responses.TransportCompanyResponseDto;
 import com.example.transportcompany.models.entities.*;
 import com.example.transportcompany.repositories.*;
 import com.example.transportcompany.services.ClientService;
@@ -12,7 +11,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -38,18 +36,21 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public String registerClient(ClientDto clientDto, TransportCompanyRequestDto company) {
         if (clientRepository.findByName(clientDto.getName()).isEmpty()) {
+
             Client client = mapper.map(clientDto, Client.class);
-            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(company, TransportCompanyResponseDto.class);
+            Company transportCompany = transportCompanyRepository.findByName(company.getName()).orElse(null);
 
-            if (transportCompanyResponseDto.getClients() == null) {
-                transportCompanyResponseDto.setClients(new HashSet<>());
+            if (transportCompany == null) {
+                // If the company doesn't exist, create a new one and map the data
+                transportCompany = mapper.map(company, Company.class);
+            } else {
+                // If the company already exists, update its data with the new values
+                mapper.map(company, transportCompany);
             }
-            transportCompanyResponseDto.getClients().add(client);
 
+            client.setCompany(transportCompany);
             clientRepository.saveAndFlush(client);
 
-            TransportCompany transportCompany = mapper.map(company, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
 
             return "Successfully registered client";
         }
@@ -63,7 +64,8 @@ public class ClientServiceImpl implements ClientService {
             Client client = clientRepository.findByName(name).get();
 
             ClientDto clientDto = new ClientDto(newName, client.getPhoneNumber(), client.getEmail());
-            client = mapper.map(clientDto, Client.class);
+
+            mapper.map(client, clientDto);
             clientRepository.saveAndFlush(client);
 
             return "Successfully changed client's name";
@@ -78,7 +80,8 @@ public class ClientServiceImpl implements ClientService {
             Client client = clientRepository.findByName(name).get();
 
             ClientDto clientDto = new ClientDto(client.getName(), newPhoneNumber, client.getEmail());
-            client = mapper.map(clientDto, Client.class);
+
+            mapper.map(client, clientDto);
             clientRepository.saveAndFlush(client);
 
             return "Successfully changed client's phone number";
@@ -93,7 +96,8 @@ public class ClientServiceImpl implements ClientService {
             Client client = clientRepository.findByName(name).get();
 
             ClientDto clientDto = new ClientDto(client.getName(), client.getPhoneNumber(), newEmail);
-            client = mapper.map(clientDto, Client.class);
+
+            mapper.map(client, clientDto);
             clientRepository.saveAndFlush(client);
 
             return "Successfully changed client's email";

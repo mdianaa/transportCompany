@@ -1,6 +1,6 @@
 package com.example.transportcompany.models.dtos.requests;
 
-import com.example.transportcompany.utils.enums.VehicleTypeTransportPeople;
+import com.example.transportcompany.utils.enums.VehicleTypeForPeopleTransportation;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
@@ -25,5 +25,5 @@ public class PeopleTransportVehicleDto {
     private String engine;
 
     @Enumerated(EnumType.STRING)
-    private VehicleTypeTransportPeople vehicleType;
+    private VehicleTypeForPeopleTransportation vehicleType;
 }

@@ -1,9 +1,8 @@
 package com.example.transportcompany.services.impl;
 
 import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
-import com.example.transportcompany.models.dtos.responses.TransportCompanyResponseDto;
 import com.example.transportcompany.models.dtos.requests.TransportationRequestDto;
-import com.example.transportcompany.models.entities.TransportCompany;
+import com.example.transportcompany.models.entities.Company;
 import com.example.transportcompany.models.entities.Transportation;
 import com.example.transportcompany.repositories.TransportCompanyRepository;
 import com.example.transportcompany.repositories.TransportationRepository;
@@ -14,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 @Service
@@ -34,18 +31,22 @@ public class TransportationServiceImpl implements TransportationService {
 
     @Override
     public String registerTransportation(TransportationRequestDto transportationRequestDto, TransportCompanyRequestDto company) {
-        TransportCompanyResponseDto transportCompanyResponseDto = new TransportCompanyResponseDto();
-
-        if (transportCompanyResponseDto.getTransportations() == null) {
-            transportCompanyResponseDto.setTransportations(new HashSet<>());
-        }
-        transportCompanyResponseDto.getTransportations().add(transportationRequestDto);
-
         Transportation transportation = mapper.map(transportationRequestDto, Transportation.class);
-        TransportCompany transportCompany = mapper.map(company, TransportCompany.class);
+
+        // Find the TransportCompany by name
+        Company transportCompany = transportCompanyRepository.findByName(company.getName()).orElse(null);
+
+        if (transportCompany == null) {
+            // If the company doesn't exist, create a new one and map the data
+            transportCompany = mapper.map(company, Company.class);
+        } else {
+            // If the company already exists, update its data with the new values
+            mapper.map(company, transportCompany);
+        }
+
+        transportation.setCompany(transportCompany);
 
         transportationRepository.saveAndFlush(transportation);
-        transportCompanyRepository.saveAndFlush(transportCompany);
 
         return "Successfully registered a transportation";
     }

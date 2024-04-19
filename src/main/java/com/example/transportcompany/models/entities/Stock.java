@@ -13,11 +13,8 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
-@DiscriminatorValue("STOCK_LOAD")
+//@DiscriminatorValue("STOCK_LOAD")
 public class Stock extends Load {
-
-    @Column(nullable = false, length = 20)
-    private long name;
 
     @Column(nullable = false)
     private BigDecimal weight;

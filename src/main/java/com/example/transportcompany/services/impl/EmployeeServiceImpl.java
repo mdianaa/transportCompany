@@ -2,7 +2,6 @@ package com.example.transportcompany.services.impl;
 
 import com.example.transportcompany.models.dtos.requests.EmployeeDto;
 import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
-import com.example.transportcompany.models.dtos.responses.TransportCompanyResponseDto;
 import com.example.transportcompany.models.entities.*;
 import com.example.transportcompany.repositories.EmployeeRepository;
 import com.example.transportcompany.repositories.TransportCompanyRepository;
@@ -33,20 +32,26 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String registerEmployee(EmployeeDto employeeDto, TransportCompanyRequestDto company, Vehicle vehicle) {
         if (employeeRepository.findByName(employeeDto.getName()).isEmpty()) {
-            Employee employee = mapper.map(employeeDto, Employee.class);
-            TransportCompanyResponseDto transportCompanyResponseDto = mapper.map(company, TransportCompanyResponseDto.class);
+            DriverEmployee driverEmployee = mapper.map(employeeDto, DriverEmployee.class);
+            Company transportCompany = transportCompanyRepository.findByName(company.getName()).orElse(null);
 
-            if (transportCompanyResponseDto.getEmployees() == null) {
-                transportCompanyResponseDto.setEmployees(new HashSet<>());
+            if (transportCompany == null) {
+                // If the company doesn't exist, create a new one and map the data
+                transportCompany = mapper.map(company, Company.class);
+            } else {
+                // If the company already exists, update its data with the new values
+                mapper.map(company, transportCompany);
             }
-            transportCompanyResponseDto.getEmployees().add(employee);
 
-            employee.setVehicle(vehicle);
+            if (transportCompany.getDriverEmployees() == null) {
+                transportCompany.setDriverEmployees(new HashSet<>());
+            }
+            transportCompany.getDriverEmployees().add(driverEmployee);
 
-            employeeRepository.saveAndFlush(employee);
+            driverEmployee.setVehicle(vehicle);
+            driverEmployee.setCompany(transportCompany);
 
-            TransportCompany transportCompany = mapper.map(company, TransportCompany.class);
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully registered employee";
         }
@@ -57,11 +62,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String editEmployeeName(String name, String newName) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
-            EmployeeDto employeeDto = new EmployeeDto(newName, employee.getPhoneNumber(), employee.getEmail(), employee.getSalary(), employee.getQualification());
-            employee = mapper.map(employeeDto, Employee.class);
-            employeeRepository.saveAndFlush(employee);
+            EmployeeDto employeeDto = new EmployeeDto(newName, driverEmployee.getPhoneNumber(), driverEmployee.getEmail(), driverEmployee.getSalary(), driverEmployee.getQualification());
+
+//            employee.setName(newName);
+
+            mapper.map(driverEmployee, employeeDto);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully changed employee's name";
         }
@@ -72,11 +80,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String editEmployeePhoneNumber(String name, String newPhoneNumber) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
-            EmployeeDto employeeDto = new EmployeeDto(employee.getName(), newPhoneNumber, employee.getEmail(), employee.getSalary(), employee.getQualification());
-            employee = mapper.map(employeeDto, Employee.class);
-            employeeRepository.saveAndFlush(employee);
+            EmployeeDto employeeDto = new EmployeeDto(driverEmployee.getName(), newPhoneNumber, driverEmployee.getEmail(), driverEmployee.getSalary(), driverEmployee.getQualification());
+
+            mapper.map(driverEmployee, employeeDto);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully changed employee's phone number";
         }
@@ -87,11 +96,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String editEmployeeEmail(String name, String newEmail) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
-            EmployeeDto employeeDto = new EmployeeDto(employee.getName(), employee.getPhoneNumber(), newEmail, employee.getSalary(), employee.getQualification());
-            employee = mapper.map(employeeDto, Employee.class);
-            employeeRepository.saveAndFlush(employee);
+            EmployeeDto employeeDto = new EmployeeDto(driverEmployee.getName(), driverEmployee.getPhoneNumber(), newEmail, driverEmployee.getSalary(), driverEmployee.getQualification());
+
+            mapper.map(driverEmployee, employeeDto);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully changed employee's email";
         }
@@ -102,11 +112,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String editEmployeeSalary(String name, BigDecimal newSalary) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
-            EmployeeDto employeeDto = new EmployeeDto(employee.getName(), employee.getPhoneNumber(), employee.getEmail(), newSalary, employee.getQualification());
-            employee = mapper.map(employeeDto, Employee.class);
-            employeeRepository.saveAndFlush(employee);
+            EmployeeDto employeeDto = new EmployeeDto(driverEmployee.getName(), driverEmployee.getPhoneNumber(), driverEmployee.getEmail(), newSalary, driverEmployee.getQualification());
+
+            mapper.map(driverEmployee, employeeDto);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully changed employee's salary";
         }
@@ -117,11 +128,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String editEmployeeVehicle(String name, Vehicle vehicle) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
-            employee.setVehicle(vehicle);
+            driverEmployee.setVehicle(vehicle);
 
-            employeeRepository.saveAndFlush(employee);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully changed employee's vehicle";
         }
@@ -132,11 +143,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String editEmployeeQualification(String name, DriverQualification qualification) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
-            employee.setQualification(qualification);
+            driverEmployee.setQualification(qualification);
 
-            employeeRepository.saveAndFlush(employee);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully changed employee's qualification";
         }
@@ -145,20 +156,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<Employee> getAllEmployeesInCompany(String name) {
+    public List<DriverEmployee> getAllEmployeesInCompany(String name) {
         return employeeRepository.findAll();
     }
 
     @Override
     public String commitNewTransportation(String name, Transportation transportation) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
 
 
 
-            employee.getTransportations().add(transportation);
+            driverEmployee.getTransportations().add(transportation);
 
-            employeeRepository.saveAndFlush(employee);
+            employeeRepository.saveAndFlush(driverEmployee);
 
             return "Successfully committed new transportation";
         }
@@ -169,8 +180,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public String deleteEmployee(String name) {
         if (employeeRepository.findByName(name).isPresent()) {
-            Employee employee = employeeRepository.findByName(name).get();
-            employeeRepository.delete(employee);
+            DriverEmployee driverEmployee = employeeRepository.findByName(name).get();
+            employeeRepository.delete(driverEmployee);
 
             return "Successfully deleted employee";
         }

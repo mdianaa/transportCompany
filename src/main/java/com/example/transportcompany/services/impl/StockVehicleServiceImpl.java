@@ -2,8 +2,9 @@ package com.example.transportcompany.services.impl;
 
 import com.example.transportcompany.models.dtos.requests.StockTransportCompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.StockTransportVehicleDto;
-import com.example.transportcompany.models.entities.StockTransportCompany;
+import com.example.transportcompany.models.entities.StockTransportationCompany;
 import com.example.transportcompany.models.entities.StockTransportVehicle;
+import com.example.transportcompany.models.entities.Company;
 import com.example.transportcompany.repositories.StockTransportVehicleRepository;
 import com.example.transportcompany.repositories.TransportCompanyRepository;
 import com.example.transportcompany.services.StockVehicleService;
@@ -36,8 +37,11 @@ public class StockVehicleServiceImpl implements StockVehicleService {
             }
             company.getVehicles().add(vehicle);
 
-            StockTransportCompany stockTransportCompany = mapper.map(company, StockTransportCompany.class);
-            transportCompanyRepository.saveAndFlush(stockTransportCompany);
+            StockTransportationCompany stockTransportCompany = mapper.map(company, StockTransportationCompany.class);
+            Company transportCompany = transportCompanyRepository.findByName(stockTransportCompany.getName()).get();
+            mapper.map(transportCompany, stockTransportCompany);
+
+            transportCompanyRepository.saveAndFlush(transportCompany);
 
             return "Successfully registered vehicle";
         }

@@ -15,9 +15,9 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@DiscriminatorValue("STOCK_TRANSPORT_COMPANY")
-public class StockTransportCompany extends TransportCompany {
+//@DiscriminatorValue("STOCK_TRANSPORT_COMPANY")
+public class StockTransportationCompany extends Company {
 
-    @OneToMany(mappedBy = "company")
+    @OneToMany(mappedBy = "company", targetEntity = Vehicle.class)
     private Set<StockTransportVehicle> vehicles;
 }

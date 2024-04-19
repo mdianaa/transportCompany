@@ -2,7 +2,7 @@ package com.example.transportcompany.models.dtos.responses;
 
 import com.example.transportcompany.models.dtos.requests.TransportationRequestDto;
 import com.example.transportcompany.models.entities.Client;
-import com.example.transportcompany.models.entities.Employee;
+import com.example.transportcompany.models.entities.DriverEmployee;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class TransportCompanyResponseDto {
 
-    private Set<Employee> employees;
+    private Set<DriverEmployee> driverEmployees;
     private Set<Client> clients;
     private Set<TransportationRequestDto> transportations;
 
