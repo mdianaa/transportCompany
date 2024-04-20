@@ -15,6 +15,6 @@ import lombok.Setter;
 public class StockTransportVehicle extends Vehicle {
 
     @Enumerated(EnumType.STRING)
-    private VehicleTypeForStockTransportation vehicleType;
+    private VehicleTypeForStockTransportation stockVehicleType;
 
 }

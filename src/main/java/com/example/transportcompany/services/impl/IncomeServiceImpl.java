@@ -1,6 +1,6 @@
 package com.example.transportcompany.services.impl;
 
-import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.CompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.TransportationRequestDto;
 import com.example.transportcompany.models.dtos.responses.TransportCompanyResponseDto;
 import com.example.transportcompany.models.dtos.responses.TransportationResponseDto;
@@ -25,7 +25,7 @@ public class IncomeServiceImpl implements IncomeService {
     }
 
     @Override
-    public BigDecimal calculateIncomeByMonth(TransportCompanyRequestDto transportCompany, Month month) {
+    public BigDecimal calculateIncomeForCompanyByMonth(CompanyRequestDto transportCompany, Month month) {
         Income income = incomeRepository.findByMonthAndCompany(month, transportCompany).get();
 
         if (income.getCurrentMonthIncome() != null) {
@@ -45,7 +45,7 @@ public class IncomeServiceImpl implements IncomeService {
         }
 
         income.setCurrentMonthIncome(incomeByMonth);
-        incomeRepository.saveAndFlush(income);
+        incomeRepository.save(income);
 
         return incomeByMonth;
     }

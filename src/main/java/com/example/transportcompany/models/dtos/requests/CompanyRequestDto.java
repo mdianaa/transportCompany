@@ -1,5 +1,7 @@
 package com.example.transportcompany.models.dtos.requests;
 
+import com.example.transportcompany.utils.enums.CompanyType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -12,10 +14,13 @@ import jakarta.validation.constraints.NotNull;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TransportCompanyRequestDto {
+public class CompanyRequestDto {
 
      @NotNull(message = "Name should be a valid string")
      private String name;
+
+     @Enumerated
+     private CompanyType type;
 
      @NotNull(message = "Address should be a valid string")
      private String address;

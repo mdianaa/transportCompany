@@ -1,6 +1,6 @@
 package com.example.transportcompany.utils.enums;
 
 public enum CompanyType {
-    PEOPLE_TRANSPORT,
-    STOCK_TRANSPORT
+    STOCK_TRANSPORT_COMPANY,
+    PERSON_TRANSPORT_COMPANY
 }

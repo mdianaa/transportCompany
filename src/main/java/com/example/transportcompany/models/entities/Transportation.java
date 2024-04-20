@@ -18,10 +18,10 @@ import java.util.Set;
 @Table(name = "transportations")
 public class Transportation extends BaseEntity {
 
-    @Column(name = "start_point", nullable = false)
+    @Column(name = "start_point", nullable = false, length = 30)
     private String startPoint;
 
-    @Column(name = "end_point", nullable = false)
+    @Column(name = "end_point", nullable = false, length = 30)
     private String endPoint;
 
     @Column(name = "departure_date", nullable = false)
@@ -30,7 +30,7 @@ public class Transportation extends BaseEntity {
     @Column(name = "arrival_date", nullable = false)
     private LocalDate arrivalDate;
 
-    @Column(name = "transportation_price_per_unit", nullable = false)
+    @Column(name = "transportation_price_per_unit", nullable = false, precision = 10, scale = 2)
     private BigDecimal transportationPricePerUnit;
 
     @Column(name = "is_paid")
@@ -40,7 +40,7 @@ public class Transportation extends BaseEntity {
     @JoinColumn(name="employee_id")
     private DriverEmployee driverEmployee;
 
-    @OneToMany(mappedBy = "transportation", targetEntity = Load.class)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Load> load;
 
     @ManyToOne

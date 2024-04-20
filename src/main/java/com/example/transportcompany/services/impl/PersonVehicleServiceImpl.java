@@ -1,13 +1,14 @@
 package com.example.transportcompany.services.impl;
 
-import com.example.transportcompany.models.dtos.requests.PeopleTransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.CompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.PeopleTransportVehicleDto;
-import com.example.transportcompany.models.entities.PersonTransportationCompany;
-import com.example.transportcompany.models.entities.PersonTransportVehicle;
 import com.example.transportcompany.models.entities.Company;
-import com.example.transportcompany.repositories.PeopleTransportVehicleRepository;
-import com.example.transportcompany.repositories.TransportCompanyRepository;
+import com.example.transportcompany.models.entities.PersonTransportVehicle;
+import com.example.transportcompany.models.entities.StockTransportVehicle;
+import com.example.transportcompany.repositories.CompanyRepository;
+import com.example.transportcompany.repositories.PersonTransportVehicleRepository;
 import com.example.transportcompany.services.PersonVehicleService;
+import com.example.transportcompany.utils.enums.CompanyType;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,34 +19,39 @@ import java.util.HashSet;
 @Service
 public class PersonVehicleServiceImpl implements PersonVehicleService {
 
-    private final PeopleTransportVehicleRepository peopleTransportVehicleRepository;
-    private final TransportCompanyRepository transportCompanyRepository;
+    private final PersonTransportVehicleRepository personTransportVehicleRepository;
+    private final CompanyRepository companyRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public PersonVehicleServiceImpl(PeopleTransportVehicleRepository peopleTransportVehicleRepository, TransportCompanyRepository transportCompanyRepository,ModelMapper modelMapper) {
-        this.peopleTransportVehicleRepository = peopleTransportVehicleRepository;
-        this.transportCompanyRepository = transportCompanyRepository;
+    public PersonVehicleServiceImpl(PersonTransportVehicleRepository personTransportVehicleRepository, CompanyRepository companyRepository, ModelMapper modelMapper) {
+        this.personTransportVehicleRepository = personTransportVehicleRepository;
+        this.companyRepository = companyRepository;
         this.mapper = modelMapper;
     }
 
     @Override
-    public String registerPersonVehicle(PeopleTransportVehicleDto peopleTransportVehicleDto, PeopleTransportCompanyRequestDto company) {
-        if (peopleTransportVehicleRepository.findByRegistrationNumber(peopleTransportVehicleDto.getRegistrationNumber()).isEmpty()) {
-            PersonTransportVehicle vehicle = mapper.map(peopleTransportVehicleDto, PersonTransportVehicle.class);
-            peopleTransportVehicleRepository.saveAndFlush(vehicle);
+    public String registerPersonVehicle(PeopleTransportVehicleDto peopleTransportVehicleDto, CompanyRequestDto company) {
+        if (personTransportVehicleRepository.findByRegistrationNumber(peopleTransportVehicleDto.getRegistrationNumber()).isEmpty()) {
 
-            if (company.getVehicles() == null) {
-                company.setVehicles(new HashSet<>());
+            if (!company.getType().equals(CompanyType.PERSON_TRANSPORT_COMPANY)) {
+                return "Unable to register person transport vehicle to a stock transport company";
             }
 
-            company.getVehicles().add(vehicle);
+            PersonTransportVehicle vehicle = mapper.map(peopleTransportVehicleDto, PersonTransportVehicle.class);
+            Company personTransportCompany = companyRepository.findByName(company.getName()).get();
 
-            PersonTransportationCompany personTransportCompany = mapper.map(company, PersonTransportationCompany.class);
-            Company transportCompany = transportCompanyRepository.findByName(personTransportCompany.getName()).get();
-            mapper.map(transportCompany, personTransportCompany);
+            vehicle.setCompany(personTransportCompany);
 
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            personTransportVehicleRepository.saveAndFlush(vehicle);
+
+            if (personTransportCompany.getVehicles() == null) {
+                personTransportCompany.setVehicles(new HashSet<>());
+            }
+
+            personTransportCompany.getVehicles().add(vehicle);
+
+            companyRepository.save(personTransportCompany);
 
             return "Successfully registered vehicle";
         }
@@ -54,45 +60,29 @@ public class PersonVehicleServiceImpl implements PersonVehicleService {
     }
 
     @Override
-    public String editRegistrationNumber(String registrationNumber, String newRegistrationNumber) {
-        if (peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            PersonTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+    public String editPersonVehicle(long vehicleId, PeopleTransportVehicleDto peopleTransportVehicleDto) {
+        if (personTransportVehicleRepository.findById(vehicleId).isPresent()) {
+            PersonTransportVehicle vehicle = personTransportVehicleRepository.findById(vehicleId).get();
 
-            PeopleTransportVehicleDto peopleTransportVehicle = new PeopleTransportVehicleDto(newRegistrationNumber, vehicle.getModel(), vehicle.getEngine(), vehicle.getVehicleType());
-            vehicle = mapper.map(peopleTransportVehicle, PersonTransportVehicle.class);
-            peopleTransportVehicleRepository.saveAndFlush(vehicle);
+            mapper.map(peopleTransportVehicleDto, vehicle);
+            personTransportVehicleRepository.saveAndFlush(vehicle);
 
             return "Successfully changed vehicle's registration number";
         }
 
-        return "Cannot find a vehicle with this registration number!";
-    }
-
-    @Override
-    public String editVehicleEngine(String registrationNumber, String newEngine) {
-        if (peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            PersonTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
-
-            PeopleTransportVehicleDto peopleTransportVehicle = new PeopleTransportVehicleDto(vehicle.getRegistrationNumber(), vehicle.getModel(), newEngine, vehicle.getVehicleType());
-            vehicle = mapper.map(peopleTransportVehicle, PersonTransportVehicle.class);
-            peopleTransportVehicleRepository.saveAndFlush(vehicle);
-
-            return "Successfully changed vehicle's engine";
-        }
-
-        return "Cannot find a vehicle with this registration number!";
+        return "Cannot find a vehicle with this id!";
     }
 
     @Override
     public PersonTransportVehicle getVehicleByRegistrationNumber(String registrationNumber) {
-        return peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+        return personTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
     }
 
     @Override
     public String deleteVehicle(String registrationNumber) {
-        if (peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            PersonTransportVehicle vehicle = peopleTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
-            peopleTransportVehicleRepository.delete(vehicle);
+        if (personTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
+            PersonTransportVehicle vehicle = personTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+            personTransportVehicleRepository.delete(vehicle);
 
             return "Successfully deleted vehicle";
         }

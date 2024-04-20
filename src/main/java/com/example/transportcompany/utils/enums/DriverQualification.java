@@ -8,5 +8,6 @@ public enum DriverQualification {
     CE, // for large vehicles + trailer
     D1, // for mini-buses
     D1E, // for mini-buses + trailer
-    DE // for buses + trailer
+    DE, // for buses + trailer
+    CISTERN
 }

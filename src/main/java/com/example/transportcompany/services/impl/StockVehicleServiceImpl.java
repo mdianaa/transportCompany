@@ -1,13 +1,13 @@
 package com.example.transportcompany.services.impl;
 
-import com.example.transportcompany.models.dtos.requests.StockTransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.CompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.StockTransportVehicleDto;
-import com.example.transportcompany.models.entities.StockTransportationCompany;
-import com.example.transportcompany.models.entities.StockTransportVehicle;
 import com.example.transportcompany.models.entities.Company;
+import com.example.transportcompany.models.entities.StockTransportVehicle;
+import com.example.transportcompany.repositories.CompanyRepository;
 import com.example.transportcompany.repositories.StockTransportVehicleRepository;
-import com.example.transportcompany.repositories.TransportCompanyRepository;
 import com.example.transportcompany.services.StockVehicleService;
+import com.example.transportcompany.utils.enums.CompanyType;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -17,31 +17,38 @@ import java.util.HashSet;
 public class StockVehicleServiceImpl implements StockVehicleService {
 
     private final StockTransportVehicleRepository stockTransportVehicleRepository;
-    private final TransportCompanyRepository transportCompanyRepository;
+    private final CompanyRepository companyRepository;
     private final ModelMapper mapper;
 
-    public StockVehicleServiceImpl(StockTransportVehicleRepository stockTransportVehicleRepository, TransportCompanyRepository transportCompanyRepository, ModelMapper modelMapper) {
+    public StockVehicleServiceImpl(StockTransportVehicleRepository stockTransportVehicleRepository, CompanyRepository companyRepository, ModelMapper modelMapper) {
         this.stockTransportVehicleRepository = stockTransportVehicleRepository;
-        this.transportCompanyRepository = transportCompanyRepository;
+        this.companyRepository = companyRepository;
         this.mapper = modelMapper;
     }
 
     @Override
-    public String registerStockVehicle(StockTransportVehicleDto stockTransportVehicleDto, StockTransportCompanyRequestDto company) {
+    public String registerStockVehicle(StockTransportVehicleDto stockTransportVehicleDto, CompanyRequestDto company) {
         if (stockTransportVehicleRepository.findByRegistrationNumber(stockTransportVehicleDto.getRegistrationNumber()).isEmpty()) {
-            StockTransportVehicle vehicle = mapper.map(stockTransportVehicleDto, StockTransportVehicle.class);
-            stockTransportVehicleRepository.saveAndFlush(vehicle);
 
-            if (company.getVehicles() == null) {
-                company.setVehicles(new HashSet<>());
+            if (!company.getType().equals(CompanyType.STOCK_TRANSPORT_COMPANY)) {
+                return "Unable to register stock transport vehicle to a person transport company";
             }
-            company.getVehicles().add(vehicle);
 
-            StockTransportationCompany stockTransportCompany = mapper.map(company, StockTransportationCompany.class);
-            Company transportCompany = transportCompanyRepository.findByName(stockTransportCompany.getName()).get();
-            mapper.map(transportCompany, stockTransportCompany);
+            StockTransportVehicle vehicle = mapper.map(stockTransportVehicleDto, StockTransportVehicle.class);
+            Company stockTransportCompany = companyRepository.findByName(company.getName()).get();
 
-            transportCompanyRepository.saveAndFlush(transportCompany);
+            vehicle.setCompany(stockTransportCompany);
+
+            stockTransportVehicleRepository.save(vehicle);
+
+
+            if (stockTransportCompany.getVehicles() == null) {
+                stockTransportCompany.setVehicles(new HashSet<>());
+            }
+
+            stockTransportCompany.getVehicles().add(vehicle);
+
+            companyRepository.save(stockTransportCompany);
 
             return "Successfully registered vehicle";
         }
@@ -50,33 +57,17 @@ public class StockVehicleServiceImpl implements StockVehicleService {
     }
 
     @Override
-    public String editRegistrationNumber(String registrationNumber, String newRegistrationNumber) {
-        if (stockTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            StockTransportVehicle vehicle = stockTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
+    public String editStockVehicle(long vehicleId, StockTransportVehicleDto stockTransportVehicleDto) {
+        if (stockTransportVehicleRepository.findById(vehicleId).isPresent()) {
+            StockTransportVehicle vehicle = stockTransportVehicleRepository.findById(vehicleId).get();
 
-            StockTransportVehicleDto stockTransportVehicleDto = new StockTransportVehicleDto(newRegistrationNumber, vehicle.getModel(), vehicle.getEngine(), vehicle.getVehicleType());
-            vehicle = mapper.map(stockTransportVehicleDto, StockTransportVehicle.class);
-            stockTransportVehicleRepository.saveAndFlush(vehicle);
+            mapper.map(stockTransportVehicleDto, vehicle);
+            stockTransportVehicleRepository.save(vehicle);
 
             return "Successfully changed vehicle's registration number";
         }
 
-        return "Cannot find a vehicle with this registration number!";
-    }
-
-    @Override
-    public String editVehicleEngine(String registrationNumber, String newEngine) {
-        if (stockTransportVehicleRepository.findByRegistrationNumber(registrationNumber).isPresent()) {
-            StockTransportVehicle vehicle = stockTransportVehicleRepository.findByRegistrationNumber(registrationNumber).get();
-
-            StockTransportVehicleDto stockTransportVehicleDto = new StockTransportVehicleDto(vehicle.getRegistrationNumber(), vehicle.getModel(), newEngine, vehicle.getVehicleType());
-            vehicle = mapper.map(stockTransportVehicleDto, StockTransportVehicle.class);
-            stockTransportVehicleRepository.saveAndFlush(vehicle);
-
-            return "Successfully changed vehicle's engine";
-        }
-
-        return "Cannot find a vehicle with this registration number!";
+        return "Cannot find a vehicle with this id!";
     }
 
     @Override

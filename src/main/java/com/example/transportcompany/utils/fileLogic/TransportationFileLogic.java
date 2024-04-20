@@ -5,6 +5,7 @@ import com.example.transportcompany.models.entities.Transportation;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TransportationFileLogic {
 
@@ -14,8 +15,15 @@ public class TransportationFileLogic {
              BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
 
             for (Transportation transportation : transportations) {
-                bufferedWriter.write(transportation.getEndPoint());
-                bufferedWriter.newLine();
+                bufferedWriter.write("Transport Company: " + transportation.getCompany().getName() + System.lineSeparator());
+                bufferedWriter.write("Client Company: " + transportation.getClient().getName() + System.lineSeparator());
+                bufferedWriter.write("Start point: " + transportation.getStartPoint() + System.lineSeparator());
+                bufferedWriter.write("End point: " + transportation.getEndPoint() + System.lineSeparator());
+                bufferedWriter.write("Departure Date: " + transportation.getDepartureDate());
+                bufferedWriter.write("Arrival Date: " + transportation.getDepartureDate());
+                bufferedWriter.write("Driver employee " + transportation.getDriverEmployee().getName() + System.lineSeparator());
+                bufferedWriter.write("Price per Unit: " + transportation.getTransportationPricePerUnit() + System.lineSeparator());
+                bufferedWriter.write("Units count: " + transportation.getLoad().size() + System.lineSeparator());
             }
 
             System.out.println("Successfully wrote the data in a file");

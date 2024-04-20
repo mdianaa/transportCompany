@@ -20,7 +20,7 @@ public class Income extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Month month;
 
-    @Column(name = "current_mounth_income", nullable = false)
+    @Column(name = "current_mounth_income", nullable = false, precision = 10, scale = 2)
     private BigDecimal currentMonthIncome;
 
     @ManyToOne

@@ -16,6 +16,6 @@ import java.math.BigDecimal;
 //@DiscriminatorValue("STOCK_LOAD")
 public class Stock extends Load {
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal weight;
 }

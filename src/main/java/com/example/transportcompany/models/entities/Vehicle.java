@@ -1,5 +1,6 @@
 package com.example.transportcompany.models.entities;
 
+import com.example.transportcompany.utils.enums.DriverQualification;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import lombok.Setter;
 public class Vehicle extends BaseEntity {
 
     //TODO: registration number as ID
-    @Column(nullable = false, name = "registration_number", length = 20)
+    @Column(nullable = false, name = "registration_number", length = 20, unique = true)
     private String registrationNumber;
 
     @Column(nullable = false, length = 20)
@@ -25,8 +26,10 @@ public class Vehicle extends BaseEntity {
     @Column(length = 10)
     private String engine;
 
+    @Enumerated(EnumType.STRING)
+    private DriverQualification neededQualification;
+
     @ManyToOne
-    @JoinColumn(name = "company_id")
     private Company company;
 
     @OneToOne(mappedBy = "vehicle", targetEntity = DriverEmployee.class)

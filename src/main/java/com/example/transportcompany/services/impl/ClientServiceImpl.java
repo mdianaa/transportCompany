@@ -1,9 +1,6 @@
 package com.example.transportcompany.services.impl;
 
-import com.example.transportcompany.models.dtos.requests.ClientDto;
-import com.example.transportcompany.models.dtos.requests.PersonDto;
-import com.example.transportcompany.models.dtos.requests.StockDto;
-import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.*;
 import com.example.transportcompany.models.entities.*;
 import com.example.transportcompany.repositories.*;
 import com.example.transportcompany.services.ClientService;
@@ -11,22 +8,23 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
 public class ClientServiceImpl implements ClientService {
 
     private final ClientRepository clientRepository;
-    private final TransportCompanyRepository transportCompanyRepository;
+    private final CompanyRepository companyRepository;
     private final TransportationRepository transportationRepository;
     private final StockRepository stockRepository;
     private final PersonRepository personRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public ClientServiceImpl(ClientRepository clientRepository, TransportCompanyRepository transportCompanyRepository, TransportationRepository transportationRepository, StockRepository stockRepository, PersonRepository personRepository, ModelMapper modelMapper) {
+    public ClientServiceImpl(ClientRepository clientRepository, CompanyRepository companyRepository, TransportationRepository transportationRepository, StockRepository stockRepository, PersonRepository personRepository, ModelMapper modelMapper) {
         this.clientRepository = clientRepository;
-        this.transportCompanyRepository = transportCompanyRepository;
+        this.companyRepository = companyRepository;
         this.transportationRepository = transportationRepository;
         this.stockRepository = stockRepository;
         this.personRepository = personRepository;
@@ -34,23 +32,21 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public String registerClient(ClientDto clientDto, TransportCompanyRequestDto company) {
+    public String registerClient(ClientDto clientDto, CompanyRequestDto company, TransportationRequestDto transportationDto) {
         if (clientRepository.findByName(clientDto.getName()).isEmpty()) {
 
             Client client = mapper.map(clientDto, Client.class);
-            Company transportCompany = transportCompanyRepository.findByName(company.getName()).orElse(null);
-
-            if (transportCompany == null) {
-                // If the company doesn't exist, create a new one and map the data
-                transportCompany = mapper.map(company, Company.class);
-            } else {
-                // If the company already exists, update its data with the new values
-                mapper.map(company, transportCompany);
-            }
+            Company transportCompany = companyRepository.findByName(company.getName()).get();
+            Transportation transportation = transportationRepository.findByEndPoint(transportationDto.getEndPoint()).get();
 
             client.setCompany(transportCompany);
-            clientRepository.saveAndFlush(client);
 
+            if (client.getTransportations() == null) {
+                client.setTransportations(new HashSet<>());
+            }
+
+            client.getTransportations().add(transportation);
+            clientRepository.save(client);
 
             return "Successfully registered client";
         }
@@ -59,64 +55,30 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public String editClientName(String name, String newName) {
-        if (clientRepository.findByName(name).isPresent()) {
-            Client client = clientRepository.findByName(name).get();
+    public String editClient(long clientId, ClientDto clientDto) {
+        if (clientRepository.findById(clientId).isPresent()) {
+            Client client = clientRepository.findById(clientId).get();
 
-            ClientDto clientDto = new ClientDto(newName, client.getPhoneNumber(), client.getEmail());
+            mapper.map(clientDto, client);
+            clientRepository.save(client);
 
-            mapper.map(client, clientDto);
-            clientRepository.saveAndFlush(client);
-
-            return "Successfully changed client's name";
+            return "Successfully changed client's information.";
         }
 
-        return "Cannot find a client with this name!";
+        return "Cannot find a client with this id!";
     }
 
     @Override
-    public String editClientPhoneNumber(String name, String newPhoneNumber) {
-        if (clientRepository.findByName(name).isPresent()) {
-            Client client = clientRepository.findByName(name).get();
-
-            ClientDto clientDto = new ClientDto(client.getName(), newPhoneNumber, client.getEmail());
-
-            mapper.map(client, clientDto);
-            clientRepository.saveAndFlush(client);
-
-            return "Successfully changed client's phone number";
-        }
-
-        return "Cannot find a client with this name!";
-    }
-
-    @Override
-    public String editClientEmail(String name, String newEmail) {
-        if (clientRepository.findByName(name).isPresent()) {
-            Client client = clientRepository.findByName(name).get();
-
-            ClientDto clientDto = new ClientDto(client.getName(), client.getPhoneNumber(), newEmail);
-
-            mapper.map(client, clientDto);
-            clientRepository.saveAndFlush(client);
-
-            return "Successfully changed client's email";
-        }
-
-        return "Cannot find a client with this name!";
-    }
-
-    @Override
-    public String payTransportationPrice(String name, long transportationId) {
+    public String payTransportationPrice(long clientId, long transportationId) {
         Transportation transportation = transportationRepository.findById(transportationId).get();
-        Client client = clientRepository.findByName(name).get();
+        Client client = clientRepository.findById(clientId).get();
 
-        if (client != null && transportation.getClient().getName().equals(name)) {
+        if (client != null && transportation.getClient().getId() == clientId) {
             client.getTransportations().add(transportation);
             transportation.setPaid(true);
 
-            clientRepository.saveAndFlush(client);
-            transportationRepository.saveAndFlush(transportation);
+            clientRepository.save(client);
+            transportationRepository.save(transportation);
 
             return "Successfully paid transportation price";
         }
@@ -125,52 +87,78 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public String sendPeople(String name, Set<PersonDto> peopleDto) {
-        if (clientRepository.findByName(name).isPresent()) {
-            Client client = clientRepository.findByName(name).get();
+    public String sendPeople(long clientId, Set<PersonDto> peopleDtos, TransportationRequestDto transportationDto) {
+        if (clientRepository.findById(clientId).isPresent()) {
+            Client client = clientRepository.findById(clientId).get();
 
-            for (PersonDto personDto : peopleDto) {
-                Person person = mapper.map(personDto, Person.class);
-                client.getLoad().add(person);
-                personRepository.saveAndFlush(person);
+            // a transportation should have already been made
+            Transportation transportation = transportationRepository.findByEndPoint(transportationDto.getEndPoint()).get();
+
+            client.getTransportations().add(transportation);
+            client.setCompany(transportation.getCompany());
+
+            for (PersonDto personDto : peopleDtos) {
+                //TODO: check vehicle capacity
+//                if (transportation.getDriverEmployee().getVehicle().)) {
+                    Person person = mapper.map(personDto, Person.class);
+
+                    client.getLoad().add(person);
+                    transportation.getLoad().add(person);
+
+                    personRepository.save(person);
+//                }
             }
 
-            clientRepository.saveAndFlush(client);
+            clientRepository.save(client);
+            transportationRepository.save(transportation);
 
             return "Successfully registered people to be sent";
         }
 
-        return "Cannot find a client with this name!";
+        return "Cannot find a client with this id!";
     }
 
     @Override
-    public String sendStock(String name, Set<StockDto> stocksDto) {
-        if (clientRepository.findByName(name).isPresent()) {
-            Client client = clientRepository.findByName(name).get();
+    public String sendStock(long clientId, Set<StockDto> stocksDtos, TransportationRequestDto transportationDto) {
+        if (clientRepository.findById(clientId).isPresent()) {
+            Client client = clientRepository.findById(clientId).get();
 
-            for (StockDto stockDto : stocksDto) {
-                Stock stock = mapper.map(stockDto, Stock.class);
-                client.getLoad().add(stock);
-                stockRepository.saveAndFlush(stock);
+            Transportation transportation = transportationRepository.findByEndPoint(transportationDto.getEndPoint()).get();
+
+            client.getTransportations().add(transportation);
+            client.setCompany(transportation.getCompany());
+
+            for (StockDto stockDto : stocksDtos) {
+                //TODO: check vehicle capacity
+//                if (transportation.getDriverEmployee().getVehicle().)){
+                    Stock stock = mapper.map(stockDto, Stock.class);
+
+                    client.getLoad().add(stock);
+                    transportation.getLoad().add(stock);
+
+                    stockRepository.save(stock);
+//                }
             }
 
-            clientRepository.saveAndFlush(client);
+            clientRepository.save(client);
+            transportationRepository.save(transportation);
 
             return "Successfully registered stock to be sent";
         }
 
-        return "Cannot find a client with this name!";
+        return "Cannot find a client with this id!";
     }
 
+
     @Override
-    public String deleteClient(String name) {
-        if (clientRepository.findByName(name).isPresent()) {
-            Client client = clientRepository.findByName(name).get();
+    public String deleteClient(long clientId) {
+        if (clientRepository.findById(clientId).isPresent()) {
+            Client client = clientRepository.findById(clientId).get();
             clientRepository.delete(client);
 
             return "Successfully deleted client";
         }
 
-        return "Cannot find a client with this name!";
+        return "Cannot find a client with this id!";
     }
 }

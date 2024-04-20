@@ -1,5 +1,8 @@
 package com.example.transportcompany.utils.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum VehicleTypeForStockTransportation {
 
     SMALL_TRUCK(8),

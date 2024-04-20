@@ -1,100 +1,57 @@
 package com.example.transportcompany.services.impl;
 
-import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.CompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.TransportationRequestDto;
 import com.example.transportcompany.models.entities.Company;
 import com.example.transportcompany.models.entities.Transportation;
-import com.example.transportcompany.repositories.TransportCompanyRepository;
+import com.example.transportcompany.repositories.CompanyRepository;
 import com.example.transportcompany.repositories.TransportationRepository;
 import com.example.transportcompany.services.TransportationService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class TransportationServiceImpl implements TransportationService {
 
     private final TransportationRepository transportationRepository;
-    private final TransportCompanyRepository transportCompanyRepository;
+    private final CompanyRepository companyRepository;
     private final ModelMapper mapper;
 
     @Autowired
-    public TransportationServiceImpl(TransportationRepository transportationRepository, TransportCompanyRepository transportCompanyRepository, ModelMapper modelMapper) {
+    public TransportationServiceImpl(TransportationRepository transportationRepository, CompanyRepository companyRepository, ModelMapper modelMapper) {
         this.transportationRepository = transportationRepository;
-        this.transportCompanyRepository = transportCompanyRepository;
+        this.companyRepository = companyRepository;
         this.mapper = modelMapper;
     }
 
     @Override
-    public String registerTransportation(TransportationRequestDto transportationRequestDto, TransportCompanyRequestDto company) {
+    public String registerTransportation(TransportationRequestDto transportationRequestDto, CompanyRequestDto company) {
         Transportation transportation = mapper.map(transportationRequestDto, Transportation.class);
 
-        // Find the TransportCompany by name
-        Company transportCompany = transportCompanyRepository.findByName(company.getName()).orElse(null);
+        Company transportCompany = companyRepository.findByName(company.getName()).get();
 
-        if (transportCompany == null) {
-            // If the company doesn't exist, create a new one and map the data
-            transportCompany = mapper.map(company, Company.class);
-        } else {
-            // If the company already exists, update its data with the new values
-            mapper.map(company, transportCompany);
-        }
+        mapper.map(company, transportCompany);
 
         transportation.setCompany(transportCompany);
 
-        transportationRepository.saveAndFlush(transportation);
+        companyRepository.save(transportCompany);
+        transportationRepository.save(transportation);
 
         return "Successfully registered a transportation";
     }
 
     @Override
-    public String editDepartureDate(long id, LocalDate newDepartureDate) {
-        if (transportationRepository.findById(id).isPresent()) {
-            Transportation transportation = transportationRepository.findById(id).get();
+    public String editTransportation(long transportationId, TransportationRequestDto transportationRequestDto) {
+        if (transportationRepository.findById(transportationId).isPresent()) {
+            Transportation transportation = transportationRepository.findById(transportationId).get();
 
-            TransportationRequestDto transportationRequestDto = new TransportationRequestDto(transportation.getStartPoint(), transportation.getEndPoint(),
-                    newDepartureDate, transportation.getArrivalDate(), transportation.getTransportationPricePerUnit());
+            mapper.map(transportationRequestDto, transportation);
+            transportationRepository.save(transportation);
 
-            transportation = mapper.map(transportationRequestDto, Transportation.class);
-            transportationRepository.saveAndFlush(transportation);
-
-            return "Successfully edited departure date";
-        }
-        return "Cannot find a transportation with this name!";
-    }
-
-    @Override
-    public String editArrivalDate(long id, LocalDate newArrivalDate) {
-        if (transportationRepository.findById(id).isPresent()) {
-            Transportation transportation = transportationRepository.findById(id).get();
-
-            TransportationRequestDto transportationRequestDto = new TransportationRequestDto(transportation.getStartPoint(), transportation.getEndPoint(),
-                    transportation.getDepartureDate(), newArrivalDate, transportation.getTransportationPricePerUnit());
-
-            transportation = mapper.map(transportationRequestDto, Transportation.class);
-            transportationRepository.saveAndFlush(transportation);
-
-            return "Successfully edited arrival date";
-        }
-        return "Cannot find a transportation with this name!";
-    }
-
-    @Override
-    public String editPricePerUnit(long id, BigDecimal newPrice) {
-        if (transportationRepository.findById(id).isPresent()) {
-            Transportation transportation = transportationRepository.findById(id).get();
-
-            TransportationRequestDto transportationRequestDto = new TransportationRequestDto(transportation.getStartPoint(), transportation.getEndPoint(),
-                    transportation.getDepartureDate(), transportation.getArrivalDate(), newPrice);
-
-            transportation = mapper.map(transportationRequestDto, Transportation.class);
-            transportationRepository.saveAndFlush(transportation);
-
-            return "Successfully edited price per unit for the transportation";
+            return "Successfully edited transportation";
         }
         return "Cannot find a transportation with this name!";
     }
@@ -105,8 +62,8 @@ public class TransportationServiceImpl implements TransportationService {
     }
 
     @Override
-    public List<Transportation> getAllTransportations() {
-        return transportationRepository.findAll();
+    public List<Transportation> getAllTransportationsForCompany(String companyName) {
+        return transportationRepository.findAllTransportationsByCompanyName(companyName);
     }
 
     @Override
@@ -121,5 +78,17 @@ public class TransportationServiceImpl implements TransportationService {
             return "Successfully calculated the total transportation price for the whole load";
         }
         return "Cannot find a transportation with this name!";
+    }
+
+    @Override
+    public String deleteTransportation(long transportationId) {
+        if (transportationRepository.findById(transportationId).isPresent()) {
+            Transportation transportation = transportationRepository.findById(transportationId).get();
+            transportationRepository.delete(transportation);
+
+            return "Successfully deleted client";
+        }
+
+        return "Cannot find a client with this id!";
     }
 }

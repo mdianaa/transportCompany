@@ -24,10 +24,10 @@ public class DriverEmployee extends BaseEntity {
     @Column(nullable = false, name = "phone_number", length = 20)
     private String phoneNumber;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 50, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal salary;
 
     @Enumerated(EnumType.STRING)

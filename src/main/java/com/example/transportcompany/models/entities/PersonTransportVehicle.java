@@ -15,6 +15,6 @@ import lombok.Setter;
 public class PersonTransportVehicle extends Vehicle {
 
     @Enumerated(EnumType.STRING)
-    private VehicleTypeForPeopleTransportation vehicleType;
+    private VehicleTypeForPeopleTransportation personVehicleType;
 
 }

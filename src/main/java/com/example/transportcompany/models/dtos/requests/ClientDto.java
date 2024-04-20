@@ -24,4 +24,8 @@ public class ClientDto {
     @NotNull(message = "Email should be a valid string")
     @Email()
     private String email;
+
+    //    Set<Vehicle> getAllVehicles(String name);
+    //
+    //    Set<Load> getAllLoadForTransportation(String name);
 }

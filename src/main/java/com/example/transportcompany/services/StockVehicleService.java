@@ -1,13 +1,14 @@
 package com.example.transportcompany.services;
 
-import com.example.transportcompany.models.dtos.requests.StockTransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.CompanyRequestDto;
 import com.example.transportcompany.models.dtos.requests.StockTransportVehicleDto;
 import com.example.transportcompany.models.entities.StockTransportVehicle;
 
 public interface StockVehicleService {
-    String registerStockVehicle(StockTransportVehicleDto stockTransportVehicleDto, StockTransportCompanyRequestDto company);
-    String editRegistrationNumber(String registrationNumber, String newRegistrationNumber);
-    String editVehicleEngine(String registrationNumber, String newEngine);
+
+    String registerStockVehicle(StockTransportVehicleDto stockTransportVehicleDto, CompanyRequestDto company);
+
+    String editStockVehicle(long vehiclesId, StockTransportVehicleDto stockTransportVehicleDto);
 
     StockTransportVehicle getVehicleByRegistrationNumber(String registrationNumber);
 

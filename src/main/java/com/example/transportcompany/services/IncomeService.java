@@ -1,10 +1,11 @@
 package com.example.transportcompany.services;
 
-import com.example.transportcompany.models.dtos.requests.TransportCompanyRequestDto;
+import com.example.transportcompany.models.dtos.requests.CompanyRequestDto;
 
 import java.math.BigDecimal;
 import java.time.Month;
 
 public interface IncomeService {
-    BigDecimal calculateIncomeByMonth(TransportCompanyRequestDto transportCompany, Month month);
+
+    BigDecimal calculateIncomeForCompanyByMonth(CompanyRequestDto transportCompany, Month month);
 }
